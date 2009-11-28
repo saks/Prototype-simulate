@@ -14,19 +14,19 @@ class Browser
     require 'rbconfig'
     Config::CONFIG['host']
   end
-  
+
   def macos?
     host.include?('darwin')
   end
-  
+
   def windows?
     host.include?('mswin')
   end
-  
+
   def linux?
     host.include?('linux')
   end
-  
+
   def applescript(script)
     raise "Can't run AppleScript on #{host}" unless macos?
     system "osascript -e '#{script}' 2>&1 >/dev/null"
@@ -40,7 +40,7 @@ class FirefoxBrowser < Browser
 
   def visit(url)
     system("open -a Firefox '#{url}'") if macos?
-    system("#{@path} #{url}") if windows? 
+    system("#{@path} #{url}") if windows?
     system("firefox #{url}") if linux?
   end
 
@@ -53,11 +53,11 @@ class SafariBrowser < Browser
   def supported?
     macos?
   end
-  
+
   def setup
     applescript('tell application "Safari" to make new document')
   end
-  
+
   def visit(url)
     applescript('tell application "Safari" to set URL of front document to "' + url + '"')
   end
@@ -79,7 +79,7 @@ class IEBrowser < Browser
   def supported?
     windows?
   end
-  
+
   def visit(url)
     if windows?
       ie = WIN32OLE.new('InternetExplorer.Application')
@@ -102,7 +102,7 @@ class KonquerorBrowser < Browser
   @@konquerorConfig = File.join(@@configDir, 'konquerorrc')
 
   def supported?
-    linux?
+    linux? and system 'which konqueror'
   end
 
   # Forces KDE's default browser to be Konqueror during the tests, and forces
@@ -124,11 +124,11 @@ class KonquerorBrowser < Browser
       copy "#{@@konquerorConfig}.bak", @@konquerorConfig, :preserve => true, :verbose => false
     end
   end
-  
+
   def visit(url)
     system("kfmclient openURL #{url}")
   end
-  
+
   def to_s
     "Konqueror"
   end
@@ -138,7 +138,7 @@ class OperaBrowser < Browser
   def initialize(path='c:\Program Files\Opera\Opera.exe')
     @path = path
   end
-  
+
   def setup
     if windows?
       puts %{
@@ -150,10 +150,10 @@ class OperaBrowser < Browser
       }
     end
   end
-  
+
   def visit(url)
-    applescript('tell application "Opera" to GetURL "' + url + '"') if macos? 
-    system("#{@path} #{url}") if windows? 
+    applescript('tell application "Opera" to GetURL "' + url + '"') if macos?
+    system("#{@path} #{url}") if windows?
     system("opera #{url}")  if linux?
   end
 
@@ -180,11 +180,11 @@ class WEBrick::HTTPResponse
   def send_response(socket)
     send(socket) unless fail_silently?
   end
-  
+
   def fail_silently?
     @fail_silently
   end
-  
+
   def fail_silently
     @fail_silently = true
   end
@@ -213,15 +213,15 @@ class BasicServlet < WEBrick::HTTPServlet::AbstractServlet
   def do_GET(req, res)
     prevent_caching(res)
     res['Content-Type'] = "text/plain"
-    
+
     req.query.each do |k, v|
       res[k] = v unless k == 'responseBody'
     end
     res.body = req.query["responseBody"]
-    
+
     raise WEBrick::HTTPStatus::OK
   end
-  
+
   def do_POST(req, res)
     do_GET(req, res)
   end
@@ -255,7 +255,7 @@ class NonCachingFileHandler < WEBrick::HTTPServlet::FileHandler
     set_default_content_type(res, req.path)
     prevent_caching(res)
   end
-  
+
   def set_default_content_type(res, path)
     res['Content-Type'] = case path
       when /\.js$/   then 'text/javascript'
@@ -297,7 +297,7 @@ class JavaScriptTestTask < ::Rake::TaskLib
     task @name do
       trap("INT") { @server.shutdown }
       t = Thread.new { @server.start }
-      
+
       # run all combinations of browsers and tests
       @browsers.each do |browser|
         if browser.supported?
@@ -314,24 +314,24 @@ class JavaScriptTestTask < ::Rake::TaskLib
               test = test[:url]
             end
             browser.visit("http://localhost:#{@port}#{test}?#{params}")
- 
+
             result = @queue.pop
             result.each { |k, v| results[k] += v }
             value = "."
-            
+
             if result[:failures] > 0
               value = "F"
               failures.push(test)
             end
-            
+
             if result[:errors] > 0
               value = "E"
               errors.push(test)
             end
-            
+
             print value
           end
-          
+
           puts "\nFinished in #{(Time.now - t0).round.to_s} seconds."
           puts "  Failures: #{failures.join(', ')}" unless failures.empty?
           puts "  Errors:   #{errors.join(', ')}" unless errors.empty?
@@ -380,3 +380,4 @@ class JavaScriptTestTask < ::Rake::TaskLib
     @browsers<<browser
   end
 end
+
