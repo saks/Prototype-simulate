@@ -1,0 +1,24 @@
+# This file has been copied here by the javascript_test_autotest plugin.
+# Comment/uncomment the browsers you wish to autotest with.
+# Same schema as per selenium-on-rails plugin, which is nice.
+browsers:
+  # Linux
+  firefox_3_5: '/usr/bin/firefox-3.5'
+  firefox_3_6: '/usr/bin/firefox-3.6'
+  firefox_3_7: '/usr/bin/firefox-3.7'
+  google_chrome: '/usr/bin/google-chrome'
+  chromium: '/usr/bin/chromium-browser'
+  opera: '/usr/bin/opera'
+
+  # Windows
+  # firefox: 'c:\Program Files\Mozilla Firefox\firefox.exe'
+  # ie: 'c:\Program Files\Internet Explorer\iexplore.exe'
+
+  # Mac OS X
+  # firefox: '/Applications/Firefox.app/Contents/MacOS/firefox-bin'
+#  safari: '/Applications/Safari.app/Contents/MacOS/Safari'
+
+  # Unix
+  # ?
+  # ?
+

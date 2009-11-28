@@ -1,0 +1,16 @@
+<%= include 'HEADER' %>
+
+;(function(e) {
+	e.addMethods({
+		simulate: function(element, type, options){
+			return (function(){
+				var opt = Object.extend(options, e.simulate.defaults);
+				new Simulate(element, type, opt);
+			})(type, options);
+		}
+	});
+<%= include 'simulate.js' %>
+})(Element);
+
+Element.simulate.Version = '<%= APP_VERSION %>';
+
