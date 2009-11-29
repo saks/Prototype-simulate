@@ -6,23 +6,96 @@ rescue LoadError
   puts 'Installation: gem install rake -y'
   exit
 end
+
+require 'yaml'
 require 'rake'
 require 'rake/clean'
 require 'rake/packagetask'
 
 $:.unshift File.dirname(__FILE__) + "/lib"
 
-APP_VERSION  = '0.0.1'
-APP_NAME     = 'prototype.symulate'
-RUBYFORGE_PROJECT = APP_NAME
-APP_TEMPLATE = "#{APP_NAME}.js.erb"
-APP_FILE_NAME= "#{APP_NAME}.js"
+#extracted from prototype js framework http://prototypejs.org
+module PrototypeHelper
+	APP_NAME     = 'prototype.symulate'
+	RUBYFORGE_PROJECT = APP_NAME
+	APP_TEMPLATE = "#{APP_NAME}.js.erb"
+	APP_FILE_NAME= "#{APP_NAME}.js"
 
-APP_ROOT     = File.expand_path(File.dirname(__FILE__))
-APP_SRC_DIR  = File.join(APP_ROOT, 'src')
-APP_DIST_DIR = File.join(APP_ROOT, 'dist')
-APP_PKG_DIR  = File.join(APP_ROOT, 'pkg')
+	APP_ROOT     = File.expand_path(File.dirname(__FILE__)) #APP_ROOT
+	APP_SRC_DIR  = File.join(APP_ROOT, 'src') 							#SRC_DIR
+	APP_DIST_DIR = File.join(APP_ROOT, 'dist') 							#DIST_DIR
+	APP_PKG_DIR  = File.join(APP_ROOT, 'pkg') 							#PKG_DIR
+	APP_DOC_DIR       = File.join(APP_ROOT, 'doc') 					#DOC_DIR
+	APP_TEMPLATES_DIR = File.join(APP_ROOT, 'templates') 		#TEMPLATES_DIR
+	APP_TEST_DIR      = File.join(APP_ROOT, 'test') 				#TEST_DIR
+	APP_TEST_UNIT_DIR = File.join(APP_TEST_DIR, 'unit') 		#TEST_UNIT_DIR
+	APP_TMP_DIR       = File.join(APP_TEST_UNIT_DIR, 'tmp') #TMP_DIR
+	APP_VERSION       = YAML.load(IO.read(File.join(APP_SRC_DIR, 'constants.yml')))['PROTOTYPE_SIMULATE_VERSION'] #VERSION
 
+
+  def self.sprocketize(path, source, destination = nil, strip_comments = true)
+    require_sprockets
+    secretary = Sprockets::Secretary.new(
+      :root           => File.join(APP_ROOT, path),
+      :load_path      => [APP_SRC_DIR],
+      :source_files   => [source],
+      :strip_comments => strip_comments
+    )
+
+    destination = File.join(APP_DIST_DIR, source) unless destination
+    secretary.concatenation.save_to(destination)
+  end
+
+  def self.build_doc_for(file)
+    mkdir_p APP_TMP_DIR
+    temp_path = File.join(APP_TMP_DIR, "prototype.temp.js")
+    sprocketize('src', file, temp_path, false)
+    rm_rf APP_DOC_DIR
+
+    PDoc::Runner.new(temp_path, {
+      :output    => APP_DOC_DIR,
+      :templates => File.join(APP_TEMPLATES_DIR, "html"),
+      :index_page => 'README.markdown'
+    }).run
+
+    rm_rf temp_path
+  end
+
+  def self.require_sprockets
+    require_submodule('Sprockets', 'sprockets')
+  end
+
+  def self.require_pdoc
+    require_submodule('PDoc', 'pdoc')
+  end
+
+  def self.require_unittest_js
+    require_submodule('UnittestJS', 'unittest_js')
+  end
+
+  def self.require_caja_builder
+    require_submodule('CajaBuilder', 'caja_builder')
+  end
+
+  def self.require_submodule(name, path)
+    begin
+      require path
+    rescue LoadError => e
+      missing_file = e.message.sub('no such file to load -- ', '')
+      if missing_file == path
+        puts "\nIt looks like you're missing #{name}. Just run:\n\n"
+        puts "  $ git submodule init"
+        puts "  $ git submodule update vendor/#{path}"
+        puts "\nand you should be all set.\n\n"
+      else
+        puts "\nIt looks like #{name} is missing the '#{missing_file}' gem. Just run:\n\n"
+        puts "  $ gem install #{missing_file}"
+        puts "\nand you should be all set.\n\n"
+      end
+      exit
+    end
+  end
+end
 
 unless ENV['rakefile_just_config']
 
@@ -30,33 +103,33 @@ task :default => [:dist, :package, :clean_package_source]
 
 desc "Builds the distribution"
 task :dist do
-  $:.unshift File.join(APP_ROOT, 'lib')
+  $:.unshift File.join(PrototypeHelper::APP_ROOT, 'lib')
   require 'protodoc'
   require 'fileutils'
-  FileUtils.mkdir_p APP_DIST_DIR
+  FileUtils.mkdir_p PrototypeHelper::APP_DIST_DIR
 
-  Dir.chdir(APP_SRC_DIR) do
-    File.open(File.join(APP_DIST_DIR, APP_FILE_NAME), 'w+') do |dist|
-      dist << Protodoc::Preprocessor.new(APP_TEMPLATE)
+  Dir.chdir(PrototypeHelper::APP_SRC_DIR) do
+    File.open(File.join(PrototypeHelper::APP_DIST_DIR, PrototypeHelper::APP_FILE_NAME), 'w+') do |dist|
+      dist << Protodoc::Preprocessor.new(PrototypeHelper::APP_TEMPLATE)
     end
   end
-  Dir.chdir(APP_DIST_DIR) do
-    FileUtils.copy_file APP_FILE_NAME, "#{APP_NAME}-#{APP_VERSION}.js"
+  Dir.chdir(PrototypeHelper::APP_DIST_DIR) do
+    FileUtils.copy_file PrototypeHelper::APP_FILE_NAME, "#{PrototypeHelper::APP_NAME}-#{PrototypeHelper::APP_VERSION}.js"
   end
   if File.directory?("website")
     FileUtils.mkdir_p "website/dist"
-    FileUtils.copy_file "dist/#{APP_FILE_NAME}",       "website/dist/#{APP_FILE_NAME}"
-    FileUtils.copy_file "dist/#{APP_FILE_NAME}",       "website/dist/#{APP_NAME}-#{APP_VERSION}.js"
+    FileUtils.copy_file "dist/#{PrototypeHelper::APP_FILE_NAME}",       "website/dist/#{PrototypeHelper::APP_SRC_DIR}"
+    FileUtils.copy_file "dist/#{PrototypeHelper::APP_FILE_NAME}",       "website/dist/#{PrototypeHelper::APP_NAME}-#{PrototypeHelper::APP_VERSION}.js"
   end
 end
 
-Rake::PackageTask.new(APP_NAME, APP_VERSION) do |package|
+Rake::PackageTask.new(PrototypeHelper::APP_NAME, PrototypeHelper::APP_VERSION) do |package|
   package.need_tar_gz = true
-  package.package_dir = APP_PKG_DIR
+  package.package_dir = PrototypeHelper::APP_PKG_DIR
   package.package_files.include(
     '[A-Z]*',
     'config/*.sample',
-    "dist/#{APP_FILE_NAME}",
+    "dist/#{PrototypeHelper::APP_FILE_NAME}",
     'lib/**',
     'src/**',
     'script/**',
@@ -114,9 +187,10 @@ end
 
 
 task :clean_package_source do
-  rm_rf File.join(APP_PKG_DIR, "#{APP_NAME}-#{APP_VERSION}")
+  rm_rf File.join(PrototypeHelper::APP_PKG_DIR, "#{PrototypeHelper::APP_NAME}-#{PrototypeHelper::APP_VERSION}")
 end
 
 Dir['tasks/**/*.rake'].each { |rake| load rake }
 
 end
+

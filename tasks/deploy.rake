@@ -1,9 +1,9 @@
 desc 'Package and upload the release to rubyforge.'
 task :release => [:clean, :dist, :package] do |t|
   require 'rubyforge'
-  version = APP_VERSION
-  name    = APP_NAME
-  rubyforge_name = RUBYFORGE_PROJECT
+  version = PrototypeHelper::APP_VERSION
+  name    = PrototypeHelper::APP_NAME
+  rubyforge_name = PrototypeHelper::RUBYFORGE_PROJECT
   v = ENV["VERSION"] or abort "Must supply VERSION=x.y.z"
   abort "Versions don't match #{v} vs #{version}" if v != version
   pkg = "pkg/#{name}-#{version}"
@@ -27,3 +27,4 @@ task :release => [:clean, :dist, :package] do |t|
   puts "Releasing #{name} v. #{version}"
   rf.add_release rubyforge_name, name, version, *files
 end
+
