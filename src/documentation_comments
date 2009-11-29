@@ -1,0 +1,61 @@
+/**
+ *  == Element ==
+ *
+ *  Prototype based helper library for simulating mouse and keyboard events.
+ *
+ *  It extends Element object with method simulate.
+ *
+ *  <h5>Common options</h5>
+ *
+ *  * `bubbles` ([[Boolean]]; default `true`): Determines whether event bubbles or not.
+ *  * `cancelable` ([[Boolean]]; default `true` if `type` is not `mousemove`)
+ *  * `view` ([[Object]]; default `window`)
+ *  * `detail` ([[Number]]; default 0)
+ *  * `screenX` ([[Number]]; default 0)
+ *  * `screenY` ([[Number]]; default 0)
+ *  * `clientX` ([[Number]]; default 0)
+ *  * `clientY` ([[Number]]; default 0)
+ *  * `ctrlKey` ([[Boolean]]; default false)
+ *  * `altKey` ([[Boolean]]; default false)
+ *  * `shiftKey` ([[Boolean]]; default false)
+ *  * `metaKey` ([[Boolean]]; default false)
+ *
+ *  <h5>Options specific for mouse events</h5>
+ *
+ *  * `button` ([[Number]]; default 0)
+ *  * `relatedTarget` (XXX; default undefined or document.body.parentNode for DOM)
+ *
+ *  <h5>options for keyboard events</h5>
+ *
+ *  * `keyCode` ([[Number]]; default 0)
+ *  * `charCode` ([[Number]]; default 0)
+ *
+ * <h5>Possible Event types</h5>
+ *  * mouseover
+ *  * mouseout
+ *  * mousemove
+ *  * mouseup
+ *  * mousedown
+ *  * dblclick
+ *  * click
+ *  * keyup
+ *  * keydown
+ *  * keypress
+ *
+**/
+
+/** section: Element
+ * Element
+**/
+
+  /**
+   *  Element.simulate(@element, type, options) -> undefined
+   *  - type (String): type of event, see [[Element section]].
+   *  - options (Object): Configuration object, see [[Element section]].
+   *
+   *  ##### Example
+   *
+   *      $('foo').simulate('keypress', Event.KEY_RETURN);
+   *      Element.simulate(document, 'keypress', Event.KEY_ESC);
+  **/
+
