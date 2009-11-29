@@ -34,6 +34,10 @@ module PrototypeHelper
 
 
   def self.sprocketize(path, source, destination = nil, strip_comments = true)
+  	puts "path = #{path}"
+  	puts "source = #{source}"
+  	puts "destination = #{destination}"
+  	puts "strip_comments = #{strip_comments}"
     require_sprockets
     secretary = Sprockets::Secretary.new(
       :root           => File.join(APP_ROOT, path),
@@ -48,15 +52,21 @@ module PrototypeHelper
 
   def self.build_doc_for(file)
     mkdir_p APP_TMP_DIR
-    temp_path = File.join(APP_TMP_DIR, "prototype.temp.js")
-    sprocketize('src', file, temp_path, false)
+    temp_path = File.join(APP_TMP_DIR, "prototype.symulate.temp.js")
+    sprocketize('dist', file, temp_path, false)
     rm_rf APP_DOC_DIR
 
-    PDoc::Runner.new(temp_path, {
-      :output    => APP_DOC_DIR,
-      :templates => File.join(APP_TEMPLATES_DIR, "html"),
-      :index_page => 'README.markdown'
-    }).run
+		begin
+		  PDoc::Runner.new(temp_path, {
+		    :output    => APP_DOC_DIR,
+		    :templates => File.join(APP_TEMPLATES_DIR, "html"),
+		    :index_page => 'README.markdown'
+		  }).run
+		rescue Exception => e
+			p e
+			puts e.backtrace
+		end
+
 
     rm_rf temp_path
   end
@@ -97,7 +107,22 @@ module PrototypeHelper
   end
 end
 
+%w[sprockets pdoc unittest_js caja_builder].each do |name|
+  $:.unshift File.join(PrototypeHelper::APP_ROOT, 'vendor', name, 'lib')
+end
+
 unless ENV['rakefile_just_config']
+
+namespace :doc do
+  desc "Builds the documentation."
+  task :build => [:require] do
+    PrototypeHelper.build_doc_for(ENV['SECTION'] ? "#{ENV['SECTION']}.js" : 'prototype.symulate.js')
+  end
+
+  task :require do
+    PrototypeHelper.require_pdoc
+  end
+end
 
 task :default => [:dist, :package, :clean_package_source]
 
@@ -142,49 +167,50 @@ end
 desc "Builds the distribution, runs the JavaScript unit + functional tests and collects their results."
 task :test => [:dist, :test_units, :test_functionals]
 
-require 'jstest'
-desc "Runs all the JavaScript unit tests and collects the results"
-JavaScriptTestTask.new(:test_units, 4711) do |t|
-  testcases        = ENV['TESTCASES']
-  tests_to_run     = ENV['TESTS']    && ENV['TESTS'].split(',')
-  browsers_to_test = ENV['BROWSERS'] && ENV['BROWSERS'].split(',')
+if ARGV.to_s.match /test/
+	require 'jstest'
+	desc "Runs all the JavaScript unit tests and collects the results"
+	JavaScriptTestTask.new(:test_units, 4711) do |t|
+		testcases        = ENV['TESTCASES']
+		tests_to_run     = ENV['TESTS']    && ENV['TESTS'].split(',')
+		browsers_to_test = ENV['BROWSERS'] && ENV['BROWSERS'].split(',')
 
-  t.mount("/dist")
-  t.mount("/src")
-  t.mount("/test")
+		t.mount("/dist")
+		t.mount("/src")
+		t.mount("/test")
 
-  Dir["test/unit/*_test.html"].sort.each do |test_file|
-    tests = testcases ? { :url => "/#{test_file}", :testcases => testcases } : "/#{test_file}"
-    test_filename = test_file[/.*\/(.+?)\.html/, 1]
-    t.run(tests) unless tests_to_run && !tests_to_run.include?(test_filename)
-  end
+		Dir["test/unit/*_test.html"].sort.each do |test_file|
+		  tests = testcases ? { :url => "/#{test_file}", :testcases => testcases } : "/#{test_file}"
+		  test_filename = test_file[/.*\/(.+?)\.html/, 1]
+		  t.run(tests) unless tests_to_run && !tests_to_run.include?(test_filename)
+		end
 
-  %w( safari firefox ie konqueror opera ).each do |browser|
-    t.browser(browser.to_sym) unless browsers_to_test && !browsers_to_test.include?(browser)
-  end
+		%w( safari firefox ie konqueror opera ).each do |browser|
+		  t.browser(browser.to_sym) unless browsers_to_test && !browsers_to_test.include?(browser)
+		end
+	end
+
+	desc "Runs all the JavaScript functional tests and collects the results"
+	JavaScriptTestTask.new(:test_functionals, 4712) do |t|
+		testcases        = ENV['TESTCASES']
+		tests_to_run     = ENV['TESTS']    && ENV['TESTS'].split(',')
+		browsers_to_test = ENV['BROWSERS'] && ENV['BROWSERS'].split(',')
+
+		t.mount("/dist")
+		t.mount("/src")
+		t.mount("/test")
+
+		Dir["test/functional/*_test.html"].sort.each do |test_file|
+		  tests = testcases ? { :url => "/#{test_file}", :testcases => testcases } : "/#{test_file}"
+		  test_filename = test_file[/.*\/(.+?)\.html/, 1]
+		  t.run(tests) unless tests_to_run && !tests_to_run.include?(test_filename)
+		end
+
+		%w( safari firefox ie konqueror opera ).each do |browser|
+		  t.browser(browser.to_sym) unless browsers_to_test && !browsers_to_test.include?(browser)
+		end
+	end
 end
-
-desc "Runs all the JavaScript functional tests and collects the results"
-JavaScriptTestTask.new(:test_functionals, 4712) do |t|
-  testcases        = ENV['TESTCASES']
-  tests_to_run     = ENV['TESTS']    && ENV['TESTS'].split(',')
-  browsers_to_test = ENV['BROWSERS'] && ENV['BROWSERS'].split(',')
-
-  t.mount("/dist")
-  t.mount("/src")
-  t.mount("/test")
-
-  Dir["test/functional/*_test.html"].sort.each do |test_file|
-    tests = testcases ? { :url => "/#{test_file}", :testcases => testcases } : "/#{test_file}"
-    test_filename = test_file[/.*\/(.+?)\.html/, 1]
-    t.run(tests) unless tests_to_run && !tests_to_run.include?(test_filename)
-  end
-
-  %w( safari firefox ie konqueror opera ).each do |browser|
-    t.browser(browser.to_sym) unless browsers_to_test && !browsers_to_test.include?(browser)
-  end
-end
-
 
 task :clean_package_source do
   rm_rf File.join(PrototypeHelper::APP_PKG_DIR, "#{PrototypeHelper::APP_NAME}-#{PrototypeHelper::APP_VERSION}")
