@@ -25,6 +25,11 @@
  *  * `button` ([[Number]]; default 0)
  *  * `relatedTarget` (XXX; default undefined or document.body.parentNode for DOM)
  *
+ *  <h5>options for drug events</h5>
+ *
+ *  * `keyCode` ([[Number]]; default 0)
+ *  * `charCode` ([[Number]]; default 0)
+ *
  *  <h5>options for keyboard events</h5>
  *
  *  * `keyCode` ([[Number]]; default 0)
@@ -56,6 +61,24 @@
    *  ##### Example
    *
    *      $('foo').simulate('keypress', Event.KEY_RETURN);
+   *
    *      Element.simulate(document, 'keypress', Event.KEY_ESC);
+   *
+   *      $('foo').simulate("mouseover");
+   *
+   *      $('foo').simulate('click');
+   *
+   *      $('foo').simulate('keydown', {ctrlKey: true, keyCode: Event.KEY_END});
+   *
+   *      $('foo').simulate('keydown', {keyCode: Event.KEY_ENTER});
+   *
+   *      $('handle').simulate("drag", {
+   *      	  dx: 20,
+   *      	  dy: 20
+   *      });
+   *
+   *      $('foo').simulate("drag", {
+   *      		dx: 10, dy: 0, speed: 'sync', complete: function(){alert('drug simulation completed!')}
+   *      });
   **/
 
