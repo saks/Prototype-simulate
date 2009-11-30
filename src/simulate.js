@@ -1,5 +1,5 @@
 var Simulate = function(el, type, options) {
-	this.target = el;
+	this.target = $(el);
 	this.options = options;
 
 	if (/^drag$/.test(type)) {
