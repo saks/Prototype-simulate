@@ -36,13 +36,77 @@
 
 new Test.Unit.Runner({
 	setup: function() {
+		$('header').stopObserving();
 	},
 
-	teardown: function() {
-	},
+	testShouldFireClick: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('click', function(){fired = true})
+		element.simulate('click');
+		assertEqual(true, fired);
+	}},
 
-	testShouldTEST: function() { with(this) {
-	 	assert(true);
+	testShouldFireDbClick: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('dbclick', function(){fired = true})
+		element.simulate('dbclick');
+		assertEqual(true, fired);
+	}},
+
+	testShouldFireMouseDown: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('mousedown', function(){fired = true})
+		element.simulate('mousedown');
+		assertEqual(true, fired);
+	}},
+
+	testShouldFireMouseUp: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('mouseup', function(){fired = true})
+		element.simulate('mouseup');
+		assertEqual(true, fired);
+	}},
+
+	testShouldFireMouseMove: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('mousemove', function(){fired = true})
+		element.simulate('mousemove');
+		assertEqual(true, fired);
+	}},
+
+	testShouldFireMouseOut: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('mouseout', function(){fired = true})
+		element.simulate('mouseout');
+		assertEqual(true, fired);
+	}},
+
+	testShouldFireMouseOver: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('mouseover', function(){fired = true})
+		element.simulate('mouseover');
+		assertEqual(true, fired);
+	}},
+
+	testShouldFireKeuDown: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('keydown', function(){fired = true})
+		element.simulate('keydown');
+		assertEqual(true, fired);
+	}},
+
+	testShouldFireCKeyUp: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('keyup', function(){fired = true})
+		element.simulate('keyup');
+		assertEqual(true, fired);
+	}},
+
+	testShouldFireKeyPress: function() { with(this) {
+		var element = $('header'), fired = false;
+		element.observe('keypress', function(){fired = true})
+		element.simulate('keypress');
+		assertEqual(true, fired);
 	}}
 
 }, {testLog: 'testlog'});
