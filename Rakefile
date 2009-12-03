@@ -16,7 +16,7 @@ $:.unshift File.dirname(__FILE__) + "/lib"
 
 #extracted from prototype js framework http://prototypejs.org
 module PrototypeHelper
-	APP_NAME     = 'prototype.symulate'
+	APP_NAME     = 'prototype.simulate'
 	RUBYFORGE_PROJECT = APP_NAME
 	APP_TEMPLATE = "#{APP_NAME}.js.erb"
 	APP_FILE_NAME= "#{APP_NAME}.js"
@@ -52,7 +52,7 @@ module PrototypeHelper
 
   def self.build_doc_for(file)
     mkdir_p APP_TMP_DIR
-    temp_path = File.join(APP_TMP_DIR, "prototype.symulate.temp.js")
+    temp_path = File.join(APP_TMP_DIR, "prototype.simulate.temp.js")
     sprocketize('dist', file, temp_path, false)
     rm_rf APP_DOC_DIR
 
@@ -116,7 +116,7 @@ unless ENV['rakefile_just_config']
 namespace :doc do
   desc "Builds the documentation."
   task :build => [:require] do
-    PrototypeHelper.build_doc_for(ENV['SECTION'] ? "#{ENV['SECTION']}.js" : 'prototype.symulate.js')
+    PrototypeHelper.build_doc_for(ENV['SECTION'] ? "#{ENV['SECTION']}.js" : 'prototype.simulate.js')
   end
 
   task :require do
