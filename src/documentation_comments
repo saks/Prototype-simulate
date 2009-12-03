@@ -25,17 +25,18 @@
  *  * `button` ([[Number]]; default 0)
  *  * `relatedTarget` (XXX; default undefined or document.body.parentNode for DOM)
  *
- *  <h5>options for drug events</h5>
+ *  <h5>Options specific for drag events</h5>
+ *
+ *  * `dx` ([[Number]]; default 0): deposition by x axis.
+ *  * `dy` ([[Number]]; default 0): deposition by y axis.
+ *  * `onComplete` ([[Fuction]]): invoked after drag finished with first argument of target element object.
+ *
+ *  <h5>Options specific for keyboard events</h5>
  *
  *  * `keyCode` ([[Number]]; default 0)
  *  * `charCode` ([[Number]]; default 0)
  *
- *  <h5>options for keyboard events</h5>
- *
- *  * `keyCode` ([[Number]]; default 0)
- *  * `charCode` ([[Number]]; default 0)
- *
- * <h5>Possible Event types</h5>
+ * <h5>Event types</h5>
  *  * mouseover
  *  * mouseout
  *  * mousemove
@@ -78,7 +79,7 @@
    *      });
    *
    *      $('foo').simulate("drag", {
-   *      		dx: 10, dy: 0, speed: 'sync', complete: function(){alert('drug simulation completed!')}
+   *      		dx: 10, dy: 0, onComplete: function(){alert('drug simulation completed!')}
    *      });
   **/
 
