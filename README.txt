@@ -4,6 +4,13 @@ Description:
     Prototype based helper library for simulating mouse and keyboard events.
     This is the port of http://github.com/eduardolundgren/jquery-simulate/
 
+There are some usefull rake tasks:
+
+rake compile                 # process with google closure compiler
+rake dist                    # Builds the distribution
+rake doc:build               # Builds the documentation.
+rake test                    # Builds the distribution, runs the JavaScript unit + functional tests and collects their results.
+
 Example:
          $('foo').simulate('keypress', Event.KEY_RETURN);
 
@@ -23,7 +30,7 @@ Example:
          });
 
          $('foo').simulate("drag", {
-         		dx: 10, dy: 0, speed: 'sync', complete: function(){alert('drug simulation completed!')}
+         		dx: 10, dy: 0, onComplete: function(){alert('drug simulation completed!')}
          });
 
 
