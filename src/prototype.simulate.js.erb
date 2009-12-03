@@ -2,7 +2,23 @@
 <%= include 'documentation_comments' %>
 
 ;(function(e) {
+
+	function getWH(element, name) {
+		var val = name == "width" ? element.offsetWidth : element.offsetHeight;
+		var style = element.style;
+		val += parseFloat(style.margin) || 0;
+		return val;
+	};
+
 	e.addMethods({
+		outerWidth: function(element) {
+			return getWH(element, 'width');
+		},
+
+		outerHeight: function(element) {
+			return getWH(element, 'height');
+		},
+
 		simulate: function(element, type, options){
 			return (function(){
 				var opt = Object.extend(options, e.simulate.defaults);
