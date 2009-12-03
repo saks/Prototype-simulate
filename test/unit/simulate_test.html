@@ -9,6 +9,8 @@
     var originalElement = window.Element;
   </script>
   <script src="../assets/prototype.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../assets/effects.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../assets/dragdrop.js" type="text/javascript" charset="utf-8"></script>
   <script src="../assets/jsunittest.js" type="text/javascript" charset="utf-8"></script>
   <link rel="stylesheet" href="../assets/unittest.css" type="text/css" />
   <script src="../../dist/prototype.simulate.js" type="text/javascript" charset="utf-8"></script>
@@ -107,6 +109,25 @@ new Test.Unit.Runner({
 		element.observe('keypress', function(){fired = true})
 		element.simulate('keypress');
 		assertEqual(true, fired);
+	}},
+
+	testShouldGrug: function() { with(this) {
+		var logDiv = $('testlog'), fired = false;
+		var initialTop = logDiv.cumulativeOffset().top, initialLeft = logDiv.cumulativeOffset().left,
+			onComplete = function(){fired = true};
+		new Draggable(logDiv);
+		wait(100, function() {
+			logDiv.simulate('drag', {dy: 30, dx: 30, onComplete: onComplete})
+
+			assertEqual(initialTop + 30, logDiv.cumulativeOffset().top);
+			assertEqual(initialLeft + 30, logDiv.cumulativeOffset().left);
+			assert(fired);
+			wait(300, function() {
+				logDiv.simulate('drag', {dy: -30, dx: -30})
+				assertEqual(initialTop, logDiv.cumulativeOffset().top);
+				assertEqual(initialLeft, logDiv.cumulativeOffset().left);
+			});
+		});
 	}}
 
 }, {testLog: 'testlog'});
