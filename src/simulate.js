@@ -96,13 +96,16 @@ Object.extend(Simulate.prototype, {
 		this.simulateEvent(target, "mousedown", coord);
 		coord = { clientX: x + 1, clientY: y + 1 };
 		this.simulateEvent(document, "mousemove", coord);
-		coord = { clientX: x + dx, clientY: y + dy };
+		coord = { clientX: (x + dx), clientY: (y + dy) };
 		this.simulateEvent(document, "mousemove", coord);
 		this.simulateEvent(document, "mousemove", coord);
 		this.simulateEvent(target, "mouseup", coord);
+		if (Object.isFunction(options.onComplete)) {
+			options.onComplete(target);
+		};
 	},
 	findCenter: function(el) {
-		var el = $(this.target), o = el.offset();
+		var el = $(this.target), o = el.cumulativeOffset();
 		return {
 			x: o.left + el.outerWidth() / 2,
 			y: o.top + el.outerHeight() / 2
