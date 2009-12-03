@@ -148,6 +148,10 @@ task :dist do
   end
 end
 
+desc "regenerate distribution"
+task :redist => [:clobber, :dist] do
+end
+
 Rake::PackageTask.new(PrototypeHelper::APP_NAME, PrototypeHelper::APP_VERSION) do |package|
   package.need_tar_gz = true
   package.package_dir = PrototypeHelper::APP_PKG_DIR
