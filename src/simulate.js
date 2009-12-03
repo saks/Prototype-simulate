@@ -31,7 +31,7 @@ Object.extend(Simulate.prototype, {
 			button: 0, relatedTarget: undefined
 		}, options);
 
-		var relatedTarget = $(e.relatedTarget)[0];
+		var relatedTarget = $(window);//FIXME: ?
 
 		if (Object.isFunction(document.createEvent)) {
 			evt = document.createEvent("MouseEvents");
