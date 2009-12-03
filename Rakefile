@@ -71,6 +71,10 @@ module PrototypeHelper
     rm_rf temp_path
   end
 
+	def self.name_with_version(postfix=nil)
+		"#{PrototypeHelper::APP_NAME}#{postfix and '.' + postfix}-#{PrototypeHelper::APP_VERSION}.js"
+	end
+
   def self.require_sprockets
     require_submodule('Sprockets', 'sprockets')
   end
@@ -139,12 +143,12 @@ task :dist do
     end
   end
   Dir.chdir(PrototypeHelper::APP_DIST_DIR) do
-    FileUtils.copy_file PrototypeHelper::APP_FILE_NAME, "#{PrototypeHelper::APP_NAME}-#{PrototypeHelper::APP_VERSION}.js"
+    FileUtils.copy_file PrototypeHelper::APP_FILE_NAME, PrototypeHelper::name_with_version
   end
   if File.directory?("website")
     FileUtils.mkdir_p "website/dist"
-    FileUtils.copy_file "dist/#{PrototypeHelper::APP_FILE_NAME}",       "website/dist/#{PrototypeHelper::APP_SRC_DIR}"
-    FileUtils.copy_file "dist/#{PrototypeHelper::APP_FILE_NAME}",       "website/dist/#{PrototypeHelper::APP_NAME}-#{PrototypeHelper::APP_VERSION}.js"
+    FileUtils.copy_file "dist/#{PrototypeHelper::APP_FILE_NAME}", "website/dist/#{PrototypeHelper::APP_SRC_DIR}"
+    FileUtils.copy_file "dist/#{PrototypeHelper::APP_FILE_NAME}", "website/dist/#{PrototypeHelper::name_with_version}.js"
   end
 end
 
@@ -216,8 +220,27 @@ if ARGV.to_s.match /test/
 	end
 end
 
+desc "process with google closure compiler"
+task :compile => :redist do
+	here = File.dirname(__FILE__)
+
+	output_file = File.join here, 'dist', PrototypeHelper::name_with_version('min')
+	input_file = File.join here, 'dist', PrototypeHelper::name_with_version
+	jar_path = File.join  here, 'vendor', 'google_closure_compiler', 'compiler.jar'
+
+	options = []
+
+#	options << "--compilation_level=ADVANCED_OPTIMIZATIONS"
+#	options << "--compilation_level=WHITESPACE_ONLY"
+	options << "--js=#{input_file}"
+	options << "--js_output_file=#{output_file}"
+
+	system "java -jar #{jar_path} #{options.join ' '}"
+
+end
+
 task :clean_package_source do
-  rm_rf File.join(PrototypeHelper::APP_PKG_DIR, "#{PrototypeHelper::APP_NAME}-#{PrototypeHelper::APP_VERSION}")
+  rm_rf File.join(PrototypeHelper::APP_PKG_DIR, PrototypeHelper::name_with_version)
 end
 
 Dir['tasks/**/*.rake'].each { |rake| load rake }
