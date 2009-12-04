@@ -30,7 +30,11 @@ Example:
          });
 
          $('foo').simulate("drag", {
-         		dx: 10, dy: 0, onComplete: function(){alert('drug simulation completed!')}
+         		dx: 10,
+            dy: 0,
+            onComplete: function(element){
+              alert('drag simulation $(' + element.id + ')');
+            }
          });
 
 
